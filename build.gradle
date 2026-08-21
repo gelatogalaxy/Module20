@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'io.qameta.allure' version '2.45.0'
+    id 'io.qameta.allure' version '3.0.0'
 }
 
 group = 'org.example'
@@ -9,6 +9,8 @@ version = '1.0-SNAPSHOT'
 repositories {
     mavenCentral()
 }
+
+def allureVersion = '2.35.4'
 
 dependencies {
     testImplementation platform('org.junit:junit-bom:6.0.0')
@@ -19,14 +21,40 @@ dependencies {
     testImplementation('io.rest-assured:rest-assured:5.5.6')
     testImplementation('org.json:json:20240303')
     testImplementation('org.hamcrest:hamcrest:2.2')
+
+    testImplementation("io.qameta.allure:allure-testng:${allureVersion}")
+    testImplementation("io.qameta.allure:allure-rest-assured:${allureVersion}")
+}
+
+allure {
+    version = '2.45.0'  // versi allure commandline (generator report HTML)
+    adapter {
+        aspectjWeaver = true
+        autoconfigure = true
+        allureJavaVersion = allureVersion
+    }
 }
 
 test {
-    useTestNG(){
-        suites("src\\test\\resources\\testng.xml")
+    useTestNG {
+        suites(file('src/test/resources/testng.xml'))
 
         testLogging {
             events("PASSED", "FAILED", "SKIPPED")
         }
     }
+
+    // hasil raw allure selalu segar tiap run
+    doFirst {
+        delete layout.buildDirectory.dir('allure-results')
+    }
+
+    // report HTML dibuat otomatis setelah test selesai (lulus maupun gagal)
+    finalizedBy tasks.named('allureReport')
+}
+
+tasks.named('allureReport') {
+    // tetap bikin report walaupun ada test yang gagal
+    mustRunAfter tasks.named('test')
+    clean = true
 }
