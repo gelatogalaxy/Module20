@@ -1,5 +1,6 @@
 package apiauto;
 
+import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import org.hamcrest.Matchers;
@@ -13,6 +14,7 @@ public class APITest {
     @Test
     public void getCurrentUserTest(){
         ValidatableResponse response = RestAssured.given()
+                .filter(new AllureRestAssured())
                 .baseUri(myBaseUrl)
                 .header("Authorization", "Bearer " + myToken)
                 .get("/api/auth/me")
@@ -28,6 +30,7 @@ public class APITest {
         requestBody.put("password", "Password123");
 
         ValidatableResponse response = RestAssured.given()
+                .filter(new AllureRestAssured())
                 .baseUri(myBaseUrl)
                 .header("Authorization", "Bearer " + myToken)
                 .body(requestBody.toString())
