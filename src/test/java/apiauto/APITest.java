@@ -22,9 +22,19 @@ public class APITest {
     String myToken;
 
     /*
-     * Token diambil saat runtime supaya test tidak gagal ketika token kedaluwarsa.
-     * Kredensial bisa diisi lewat environment variable (API_EMAIL / API_PASSWORD),
-     * kalau tidak ada maka test mendaftarkan user baru yang unik lalu login.
+     * ALASAN PERBAIKAN:
+     * Sebelumnya token ditulis langsung (hardcoded) di dalam kode. Token itu
+     * punya masa berlaku (exp) dan sudah kedaluwarsa pada 27 Agustus 2026,
+     * sehingga GET /api/auth/me membalas 401 dan getCurrentUserTest gagal di
+     * GitHub Actions padahal kode test-nya sendiri tidak bermasalah.
+     *
+     * Sekarang token diambil saat runtime supaya selalu segar:
+     *  - kalau environment variable API_EMAIL & API_PASSWORD tersedia
+     *    (misalnya diisi lewat GitHub Secrets), kredensial itu yang dipakai;
+     *  - kalau tidak ada, test mendaftarkan user baru dengan email unik
+     *    (pakai timestamp) lalu login memakai user tersebut.
+     * Dengan begitu test tidak lagi bergantung pada token yang bisa basi dan
+     * tidak ada kredensial berumur panjang yang tersimpan di repository.
      */
     @BeforeClass
     public void setUpToken() {
@@ -84,6 +94,8 @@ public class APITest {
         ValidatableResponse response = RestAssured.given()
                 .filter(new AllureRestAssured()) // opsional: attach request & response ke Allure report
                 .baseUri(myBaseUrl)
+                // Content-Type ditambahkan karena request ini mengirim body JSON.
+                // Sebelumnya header ini tidak diset dan hanya kebetulan lolos.
                 .header("Content-Type", "application/json")
                 .body(requestBody.toString())
                 .post("/api/auth/register")
