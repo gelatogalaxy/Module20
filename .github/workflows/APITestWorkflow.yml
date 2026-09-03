@@ -52,10 +52,13 @@ jobs:
 
   dependency-submission:
 
+    # Job ini butuh "Dependency graph" aktif di Settings > Code security.
+    # Selama belum aktif, submit snapshot selalu gagal, jadi job di-skip.
+    # Setelah Dependency graph diaktifkan, set repository variable
+    # ENABLE_DEPENDENCY_SUBMISSION = true untuk menyalakannya kembali.
+    if: vars.ENABLE_DEPENDENCY_SUBMISSION == 'true'
+
     runs-on: ubuntu-latest
-    # Butuh "Dependency graph" aktif di Settings > Code security.
-    # Selama belum aktif, job ini tidak boleh menggagalkan workflow.
-    continue-on-error: true
     permissions:
       contents: write
 
