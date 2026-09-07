@@ -21,25 +21,10 @@ public class APITest {
     String myBaseUrl = "https://api.rizqifauzan.com";
     String myToken;
 
-    /*
-     * ALASAN PERBAIKAN:
-     * Sebelumnya token ditulis langsung (hardcoded) di dalam kode. Token itu
-     * punya masa berlaku (exp) dan sudah kedaluwarsa pada 27 Agustus 2026,
-     * sehingga GET /api/auth/me membalas 401 dan getCurrentUserTest gagal di
-     * GitHub Actions padahal kode test-nya sendiri tidak bermasalah.
-     *
-     * Sekarang token diambil saat runtime supaya selalu segar:
-     *  - kalau environment variable API_EMAIL & API_PASSWORD tersedia
-     *    (misalnya diisi lewat GitHub Secrets), kredensial itu yang dipakai;
-     *  - kalau tidak ada, test mendaftarkan user baru dengan email unik
-     *    (pakai timestamp) lalu login memakai user tersebut.
-     * Dengan begitu test tidak lagi bergantung pada token yang bisa basi dan
-     * tidak ada kredensial berumur panjang yang tersimpan di repository.
-     */
     @BeforeClass
     public void setUpToken() {
-        String email = System.getenv("API_EMAIL");
-        String password = System.getenv("API_PASSWORD");
+        String email = System.getenv("erien@testing.com");
+        String password = System.getenv("Password123");
 
         if (email == null || email.isBlank() || password == null || password.isBlank()) {
             email = "ci" + System.currentTimeMillis() + "@example.com";
